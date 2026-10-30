@@ -39,7 +39,6 @@ export function PinForm({ notice, onUnlock }: { notice: string; onUnlock: () => 
           keyboardType="number-pad"
           maxLength={6}
           autoComplete="off"
-          autoFocus
           selectionColor={colors.textSecondary}
           style={[type.pin, styles.input]}
         />
