@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "e2e-biometrics",
+    "name": "e2e Biometrics",
     "slug": "e2e-biometrics",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -8,9 +8,11 @@
     "scheme": "e2ebiometrics",
     "userInterfaceStyle": "automatic",
     "ios": {
+      "bundleIdentifier": "dev.e2e.biometrics",
       "icon": "./assets/expo.icon"
     },
     "android": {
+      "package": "dev.e2e.biometrics",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -31,6 +33,12 @@
           "backgroundColor": "#208AEF",
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 76
+        }
+      ],
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "e2e Biometrics uses Face ID to unlock your account."
         }
       ]
     ],
