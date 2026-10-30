@@ -20,6 +20,7 @@
   "devDependencies": {
     "@e2e-dev/mobile": "^0.12.4",
     "@types/react": "~19.3.0",
+    "ai": "^7.0.157",
     "e2e": "^0.21.3",
     "eslint": "^9.39.5",
     "eslint-config-expo": "~58.0.4",

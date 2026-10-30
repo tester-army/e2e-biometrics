@@ -1,5 +1,6 @@
 import type { E2EConfig } from 'e2e';
 import { mobile } from '@e2e-dev/mobile';
+import { gateway } from 'ai';
 
 // e2e loads no .env file itself.
 try {
@@ -25,6 +26,12 @@ const app = {
 };
 
 export default {
+  agents: {
+    default: {
+      model: gateway('openai/gpt-6-luna-fast'),
+      system: 'You are a thorough QA agent. Verify every outcome.',
+    },
+  },
   secrets,
   targets: [
     {
