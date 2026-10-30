@@ -1,65 +1,33 @@
-/**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://unistyl.es/), etc.
- */
+import { StyleSheet } from 'react-native';
 
-import '@/global.css';
+export const colors = {
+  canvas: '#111111',
+  panel: '#161616',
+  hairline: 'rgba(255, 255, 255, 0.12)',
+  hairlineStrong: 'rgba(255, 255, 255, 0.3)',
+  textPrimary: '#f9f8f7',
+  textSecondary: 'rgba(255, 255, 255, 0.7)',
+  textFaint: 'rgba(255, 255, 255, 0.45)',
+  fieldFill: '#1a1a1a',
+  buttonFill: '#f9f8f7',
+  textOnLight: '#161616',
+  accentOrange: '#ff8001',
+};
 
-import { Platform } from 'react-native';
+export const fonts = {
+  display: 'Stack Sans Notch',
+  sans: 'Inter',
+  mono: 'DM Mono',
+};
 
-export const Colors = {
-  light: {
-    text: '#000000',
-    background: '#ffffff',
-    backgroundElement: '#F0F0F3',
-    backgroundSelected: '#E0E1E6',
-    textSecondary: '#60646C',
-  },
-  dark: {
-    text: '#ffffff',
-    background: '#000000',
-    backgroundElement: '#212225',
-    backgroundSelected: '#2E3135',
-    textSecondary: '#B0B4BA',
-  },
-} as const;
-
-export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
-
-export const Fonts = Platform.select({
-  ios: {
-    /** iOS `UIFontDescriptorSystemDesignDefault` */
-    sans: 'system-ui',
-    /** iOS `UIFontDescriptorSystemDesignSerif` */
-    serif: 'ui-serif',
-    /** iOS `UIFontDescriptorSystemDesignRounded` */
-    rounded: 'ui-rounded',
-    /** iOS `UIFontDescriptorSystemDesignMonospaced` */
-    mono: 'ui-monospace',
-  },
-  default: {
-    sans: 'normal',
-    serif: 'serif',
-    rounded: 'normal',
-    mono: 'monospace',
-  },
-  web: {
-    sans: 'var(--font-display)',
-    serif: 'var(--font-serif)',
-    rounded: 'var(--font-rounded)',
-    mono: 'var(--font-mono)',
-  },
+export const type = StyleSheet.create({
+  display: { fontFamily: fonts.display, fontSize: 34, lineHeight: 40 },
+  balance: { fontFamily: fonts.display, fontSize: 52, lineHeight: 60 },
+  body: { fontFamily: fonts.sans, fontSize: 16, lineHeight: 24 },
+  bodyS: { fontFamily: fonts.sans, fontSize: 14, lineHeight: 20 },
+  mono: { fontFamily: fonts.mono, fontSize: 13, lineHeight: 20 },
+  label: { fontFamily: fonts.mono, fontSize: 11, lineHeight: 16, letterSpacing: 1.1, textTransform: 'uppercase' },
+  button: { fontFamily: fonts.mono, fontSize: 13, lineHeight: 20, fontWeight: '500', textTransform: 'uppercase' },
+  brand: { fontFamily: fonts.display, fontSize: 22, lineHeight: 26, letterSpacing: -1.2 },
+  pin: { fontFamily: fonts.mono, fontSize: 22, letterSpacing: 12 },
 });
-
-export const Spacing = {
-  half: 2,
-  one: 4,
-  two: 8,
-  three: 16,
-  four: 24,
-  five: 32,
-  six: 64,
-} as const;
-
-export const BottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;
-export const MaxContentWidth = 800;

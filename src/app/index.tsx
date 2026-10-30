@@ -1,98 +1,64 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
-
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
-  return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
-}
+import { Account } from '@/components/account';
+import { AppHeader } from '@/components/app-header';
+import { Button } from '@/components/button';
+import { LockMark } from '@/components/lock-mark';
+import { PinForm } from '@/components/pin-form';
+import { colors, type } from '@/constants/theme';
+import { useLock } from '@/hooks/use-lock';
 
 export default function HomeScreen() {
+  const { state, sensor, unlock, unlockWithPin } = useLock();
+
   return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
-
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
-
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
-
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
+    <SafeAreaView style={styles.page}>
+      <AppHeader unlocked={state.status === 'unlocked'} />
+      <View style={styles.main}>
+        {state.status === 'unlocked' ? (
+          <Account method={state.method} />
+        ) : (
+          <>
+            {state.status === 'pin' ? null : <LockMark active={state.status === 'prompting'} />}
+            <View style={styles.intro}>
+              <Text accessibilityRole="header" style={[type.display, styles.heading]}>
+                Your account is locked
+              </Text>
+              {state.status === 'pin' ? null : (
+                <Text style={[type.body, styles.lede]}>Unlock it with {sensor}, or with your PIN if that fails.</Text>
+              )}
+            </View>
+            {state.status === 'pin' ? (
+              <PinForm notice={state.notice} onUnlock={unlockWithPin} />
+            ) : (
+              <View style={styles.actions}>
+                <Button
+                  testID="unlock"
+                  label={state.status === 'prompting' && state.waiting ? `Waiting for ${sensor}…` : 'Unlock'}
+                  disabled={state.status === 'prompting'}
+                  onPress={unlock}
+                />
+                {state.status === 'locked' && state.notice ? (
+                  <Text testID="lock-notice" style={[type.mono, styles.notice]}>
+                    {state.notice}
+                  </Text>
+                ) : null}
+              </View>
+            )}
+          </>
+        )}
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
-  },
-  safeArea: {
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
-  },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
-  },
-  title: {
-    textAlign: 'center',
-  },
-  code: {
-    textTransform: 'uppercase',
-  },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
-  },
+  page: { flex: 1, backgroundColor: colors.canvas, paddingHorizontal: 24 },
+  main: { paddingTop: 40, gap: 28 },
+  intro: { gap: 8 },
+  heading: { color: colors.textPrimary },
+  lede: { color: colors.textSecondary },
+  actions: { gap: 16 },
+  notice: { color: colors.textFaint },
 });
