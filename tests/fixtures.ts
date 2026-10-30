@@ -30,8 +30,8 @@ const withLockScreen = base.extend<{
     await use(platform === 'ios' ? 'faceid' : 'fingerprint');
   },
 
-  // A match or non-match sent before the prompt listens is lost. The Face ID HUD isn't in the accessibility tree,
-  // but the app knows it's up. Android's sheet shows its Use PIN button before it listens, so wait for its text.
+  // A face or finger sent before the prompt listens is lost. The Face ID HUD isn't in the tree, but the app knows
+  // it's up. Android's Use PIN button shows before the sensor listens; its text means it's ready.
   waitForPrompt: async ({ platform, screen }, use) => {
     await use(async () => {
       if (platform === 'ios') await expect(screen.getByTestId('unlock')).toHaveText(/waiting for face id/i);

@@ -18,7 +18,7 @@ export function isEnrolled() {
 export function authenticate() {
   return LocalAuthentication.authenticateAsync({
     promptMessage: 'Unlock e2e Biometrics',
-    // iOS shows its fallback button only after repeated failures, so the cancel button is the way to the PIN.
+    // iOS shows no fallback button after a failed match, so the cancel button leads to the PIN.
     cancelLabel: 'Use PIN',
     fallbackLabel: '',
     disableDeviceFallback: true,

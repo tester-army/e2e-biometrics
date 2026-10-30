@@ -23,7 +23,7 @@ export function useLock() {
   useEffect(() => {
     sensorName().then(setSensor);
     const subscription = AppState.addEventListener('change', (next) => {
-      // iOS goes inactive once the Face ID prompt is up. Android's prompt leaves AppState alone.
+      // iOS goes inactive once the Face ID prompt is up.
       if (next === 'inactive') setState((s) => (s.status === 'prompting' ? { ...s, waiting: true } : s));
       if (next === 'background') {
         setState((s) =>

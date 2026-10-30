@@ -2,17 +2,15 @@ import type { E2EConfig } from 'e2e';
 import { mobile } from '@e2e-dev/mobile';
 import { gateway } from 'ai';
 
-// e2e loads no .env file itself.
 try {
   process.loadEnvFile(new URL('.env.local', import.meta.url));
 } catch {}
 
-// A secret shorter than 6 characters fails config load, so the PIN is registered only when it's set right.
+// e2e refuses a secret under 6 characters, so an unset PIN isn't registered.
 const pin = process.env.EXPO_PUBLIC_PIN ?? '';
 const secrets: Record<string, string> = /^\d{6}$/.test(pin) ? { pin } : {};
 
-// The Debug builds load their JavaScript from Metro. iOS has port 8081 compiled in, so a launch argument moves it;
-// an Android build takes its port from `npx expo run:android --port`.
+// iOS has Metro's port compiled in, so a launch argument moves it. Android takes it at build time (`expo run:android --port`).
 const port = process.env.METRO_PORT ?? '8081';
 const app = {
   bundleId: 'dev.e2e.biometrics',

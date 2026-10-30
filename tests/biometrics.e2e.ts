@@ -22,7 +22,7 @@ describe('biometric unlock', { skip: skipWithoutPin, retries: 2, timeout: 120_00
       await waitForPrompt();
       await device.setBiometrics(sensor, 'nonmatch');
 
-      // The prompt is the system's, worded differently on each platform. Android's message lasts 2 to 3 seconds.
+      // The system's prompt, worded differently on each platform. Android shows this for only 2 to 3 seconds.
       await agent.waitFor('the system says the face or fingerprint was not recognized', { interval: 500 });
       await agent.act('choose to use the PIN instead');
       await expect(screen.getByTestId('pin-notice')).toHaveText(/didn't unlock the app\. Enter your PIN\.$/);
