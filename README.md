@@ -1,56 +1,76 @@
-# Welcome to your Expo app 👋
+# e2e-biometrics
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+An Expo lock screen that unlocks with Face ID or a fingerprint and falls back to a PIN, tested end to end on iOS and Android with [e2e](https://www.npmjs.com/package/e2e).
 
-## Get started
+<img src="docs/screenshot.png" alt="The lock screen: Your account is locked, a line naming Face ID, and Unlock" width="320">
 
-1. Install dependencies
+## How it works
 
-   ```bash
-   npm install
-   ```
+- **Unlock** (`src/hooks/use-lock.ts`): asks for Face ID on iOS or a fingerprint on Android through `expo-local-authentication`. The prompt is the system's; the app only learns whether it matched.
+- **PIN** (`src/components/pin-form.tsx`): takes over after a failed match, after Use PIN, or at once when nothing is enrolled.
+- **Background**: the app locks again as soon as it goes to the background.
 
-2. Start the app
+The app has its own PIN, like a banking app, so the device's passcode isn't offered as a fallback. The PIN comes from `.env.local` and is built into the app, which is fine for a demo; a real app checks it on its server. There's no backend.
 
-   ```bash
-   npx expo start
-   ```
+### Faces and fingers
 
-In the output, you'll find options to open the app in a
+| To play                             | iOS simulator                          | Android emulator                                          |
+| ----------------------------------- | -------------------------------------- | --------------------------------------------------------- |
+| A match                             | Features → Face ID → Matching Face     | Extended controls → Fingerprint → Finger 1 → Touch sensor |
+| A face or finger that doesn't match | Features → Face ID → Non-matching Face | The same with any other finger                            |
+| Nothing enrolled                    | Features → Face ID → Enrolled, off     | Not available                                             |
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## Getting started
 
-You can start developing by editing the files inside the **src/app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+You need Node 22.22.3+ or 24.8+, and Xcode with an iOS simulator that has Face ID or the Android SDK with an emulator ([Expo's setup guide](https://docs.expo.dev/get-started/set-up-your-environment/)).
 
 ```bash
-npm run reset-project
+npm install
+cp .env.example .env.local   # then set EXPO_PUBLIC_PIN to any 6 digits but 000000
+npm run ios                  # or: npm run android
 ```
 
-This command will move the starter code to the **example** directory and create a blank **src/app** directory where you can start developing.
+`npm run ios` builds the app, installs it on the simulator, and starts Metro. The app needs a native build, so it doesn't run in Expo Go.
 
-### Other setup steps
+### Android emulator
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+Android shows a biometric prompt only on a device with a screen lock, and the tests touch the sensor with finger 1. Set both up once, with the emulator running:
 
-## Learn more
+```bash
+adb shell locksettings set-pin 1111
+adb shell am start -a android.settings.FINGERPRINT_ENROLL   # enter 1111, then tap through to "Touch the sensor"
+for i in $(seq 15); do adb emu finger touch 1; sleep 0.5; adb emu finger remove; sleep 0.5; done   # then tap Done
+adb shell svc power stayon true                            # keeps the lock screen away
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+## End-to-end tests
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+`tests/biometrics.e2e.ts` runs on iOS and Android. A test can't show a face or touch a sensor, so e2e's `device` fixture plays them (`device.setBiometrics`), takes Face ID off the simulator (`device.enrollBiometrics`), and sends the app home and back (`device.home`, `device.openApp`). After a failed match, the agent reads the system's prompt and taps its Use PIN, since iOS and Android word and build it differently. The app's own screens use exact locators, and the PIN is typed as an e2e secret, so it stays out of reports and logs.
 
-## Join the community
+| Test                                              | Expects                                                                  |
+| ------------------------------------------------- | ------------------------------------------------------------------------ |
+| A match unlocks                                   | "Unlocked with Face ID" or "Unlocked with your fingerprint"              |
+| A failed match offers the PIN (agent)             | The system says not recognized; a wrong PIN fails, the right one unlocks |
+| Nothing enrolled goes straight to the PIN (iOS)   | The PIN field at once, with no prompt                                    |
+| The app locks again after going to the background | "Locked when the app went to the background."                            |
 
-Join our community of developers creating universal apps.
+The tests need `EXPO_PUBLIC_PIN`, and the agent test also needs a [Vercel AI Gateway](https://vercel.com/docs/ai-gateway) key, `AI_GATEWAY_API_KEY`, both in `.env.local`. Without them they skip. Android has no way to unenroll a fingerprint from a test, so the "nothing enrolled" test runs on iOS only. After `npm run ios` or `npm run android`, run:
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+```bash
+npx e2e run --target ios
+npx e2e run --target android
+```
+
+Without `--target`, both run, in about a minute and a half and under a cent. The runner starts Metro if it isn't running. To pick the simulator and emulator, or to move Metro off port 8081, set `IOS_DEVICE`, `ANDROID_DEVICE`, or `METRO_PORT` in `.env.local`; build the Android app with `npx expo run:android --port <port>` to match.
+
+## Scripts
+
+| Command             | Description                         |
+| ------------------- | ----------------------------------- |
+| `npm start`         | Start Metro                         |
+| `npm run ios`       | Build and run the app on iOS        |
+| `npm run android`   | Build and run the app on Android    |
+| `npm run lint`      | Run ESLint                          |
+| `npm run typecheck` | Run TypeScript                      |
+| `npm run format`    | Format with Prettier                |
+| `npm run test:e2e`  | Run the e2e tests on both platforms |
