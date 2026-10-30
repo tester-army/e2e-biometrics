@@ -1,4 +1,6 @@
+.agents/
 .claude/
+.cursor/
 .e2e/
 .expo/
 .idea/
