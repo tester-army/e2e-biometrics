@@ -26,22 +26,25 @@ You need Node 22.22.3+ or 24.8+, and Xcode with an iOS simulator that has Face I
 
 ```bash
 npm install
-cp .env.example .env.local   # then set EXPO_PUBLIC_PIN to any 6 digits but 000000
-npm run ios                  # or: npm run android
+cp .env.example .env.local
+npm run ios
 ```
 
-`npm run ios` builds the app, installs it on the simulator, and starts Metro. The app needs a native build, so it doesn't run in Expo Go.
+Set `EXPO_PUBLIC_PIN` in `.env.local` to any 6 digits but `000000`. `npm run ios` (or `npm run android`) builds the app, installs it on the simulator, and starts Metro. The app needs a native build, so it doesn't run in Expo Go.
 
 ### Android emulator
 
 Android shows a biometric prompt only on a device with a screen lock, and the tests touch the sensor with finger 1. Set both up once, with the emulator running:
 
-```bash
-adb shell locksettings set-pin 1111
-adb shell am start -a android.settings.FINGERPRINT_ENROLL   # enter 1111, then tap through to "Touch the sensor"
-for i in $(seq 15); do adb emu finger touch 1; sleep 0.5; adb emu finger remove; sleep 0.5; done   # then tap Done
-adb shell svc power stayon true                            # keeps the lock screen away
-```
+1. Set a screen lock: `adb shell locksettings set-pin 1111`.
+2. Open fingerprint setup with `adb shell am start -a android.settings.FINGERPRINT_ENROLL`, enter 1111, and tap through to "Touch the sensor".
+3. Touch it with finger 1 until the fingerprint is added, then tap Done:
+
+   ```bash
+   for i in $(seq 15); do adb emu finger touch 1; sleep 0.5; adb emu finger remove; sleep 0.5; done
+   ```
+
+4. Keep the screen on, so the lock screen stays away during tests: `adb shell svc power stayon true`.
 
 ## End-to-end tests
 
