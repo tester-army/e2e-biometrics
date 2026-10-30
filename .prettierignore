@@ -1,0 +1,7 @@
+.claude/
+.e2e/
+.expo/
+.idea/
+android/
+ios/
+package-lock.json
