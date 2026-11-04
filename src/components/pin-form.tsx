@@ -2,45 +2,48 @@ import { useState } from 'react';
 import { StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { Button } from '@/components/button';
-import { colors, type } from '@/constants/theme';
+import { colors, fonts, space, type } from '@/constants/theme';
 import { checkPin, pinIsSet } from '@/lib/biometrics';
 
 export function PinForm({ notice, onUnlock }: { notice: string; onUnlock: () => void }) {
   const [pin, setPin] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [focused, setFocused] = useState(false);
 
   function submit() {
     if (!pinIsSet) {
-      setError('No PIN is set. Add EXPO_PUBLIC_PIN to .env.local.');
+      setError('no pin is set. add EXPO_PUBLIC_PIN to .env.local.');
     } else if (checkPin(pin)) {
       onUnlock();
     } else {
       setPin('');
-      setError('Wrong PIN. Try again.');
+      setError('wrong pin. try again.');
     }
   }
 
   return (
     <View style={styles.form}>
-      <Text testID="pin-notice" style={[type.body, styles.notice]}>
+      <Text testID="pin-notice" style={[type.bodyL, styles.notice]}>
         {notice}
       </Text>
       <View style={styles.field}>
-        <Text style={[type.label, styles.label]}>PIN</Text>
+        <Text style={[type.caption, styles.label]}>pin</Text>
         <TextInput
           testID="pin"
-          accessibilityLabel="PIN"
+          accessibilityLabel="pin"
           value={pin}
           onChangeText={(text) => {
             setPin(text.replace(/\D/g, ''));
             setError(null);
           }}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
           secureTextEntry
           keyboardType="number-pad"
           maxLength={6}
           autoComplete="off"
-          selectionColor={colors.textSecondary}
-          style={[type.pin, styles.input]}
+          selectionColor={colors.green}
+          style={[styles.input, focused && styles.inputFocused, error !== null && styles.inputInvalid]}
         />
       </View>
       {error ? (
@@ -48,23 +51,28 @@ export function PinForm({ notice, onUnlock }: { notice: string; onUnlock: () => 
           {error}
         </Text>
       ) : null}
-      <Button testID="submit-pin" label="Unlock" disabled={pin.length !== 6} onPress={submit} />
+      <Button testID="submit-pin" label="unlock" disabled={pin.length !== 6} onPress={submit} />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  form: { gap: 16 },
-  notice: { color: colors.textSecondary },
-  field: { gap: 8 },
-  label: { color: colors.textFaint },
+  form: { gap: space(2) },
+  notice: { color: colors.neutral400 },
+  field: { gap: space(1) },
+  label: { color: colors.neutral400 },
   input: {
-    height: 52,
-    paddingHorizontal: 16,
-    borderWidth: 1,
-    borderColor: colors.hairlineStrong,
-    backgroundColor: colors.fieldFill,
-    color: colors.textPrimary,
+    height: space(7),
+    paddingHorizontal: space(2),
+    borderWidth: 2,
+    borderColor: colors.neutral800,
+    backgroundColor: colors.neutral800,
+    color: colors.offWhite,
+    fontFamily: fonts.mono,
+    fontSize: 22,
+    letterSpacing: 12,
   },
-  error: { color: colors.accentOrange },
+  inputFocused: { borderColor: colors.green },
+  inputInvalid: { borderColor: colors.mint },
+  error: { color: colors.mint },
 });

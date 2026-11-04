@@ -3,7 +3,7 @@ import { expect, secrets } from 'e2e';
 
 import { BUNDLE_ID, skipWithoutModel, skipWithoutPin, test, WRONG_PIN } from './fixtures';
 
-const UNLOCKED_WITH = { faceid: 'Unlocked with Face ID', fingerprint: 'Unlocked with your fingerprint' };
+const UNLOCKED_WITH = { faceid: 'unlocked with Face ID', fingerprint: 'unlocked with your fingerprint' };
 
 describe('biometric unlock', { skip: skipWithoutPin, retries: 2, timeout: 120_000 }, () => {
   test('a matching face or finger unlocks the app', async ({ device, screen, sensor, waitForPrompt }) => {
@@ -25,15 +25,15 @@ describe('biometric unlock', { skip: skipWithoutPin, retries: 2, timeout: 120_00
       // The system's prompt, worded differently on each platform. Android shows this for only 2 to 3 seconds.
       await agent.waitFor('the system says the face or fingerprint was not recognized', { interval: 500 });
       await agent.act('choose to use the PIN instead');
-      await expect(screen.getByTestId('pin-notice')).toHaveText(/didn't unlock the app\. Enter your PIN\.$/);
+      await expect(screen.getByTestId('pin-notice')).toHaveText(/didn't unlock the app\. enter your pin\.$/);
 
       await screen.getByTestId('pin').fill(WRONG_PIN);
       await screen.getByTestId('submit-pin').tap();
-      await expect(screen.getByTestId('pin-error')).toHaveText('Wrong PIN. Try again.');
+      await expect(screen.getByTestId('pin-error')).toHaveText('wrong pin. try again.');
 
       await screen.getByTestId('pin').fill(secrets.get('pin'));
       await screen.getByTestId('submit-pin').tap();
-      await expect(screen.getByTestId('unlock-method')).toHaveText('Unlocked with PIN');
+      await expect(screen.getByTestId('unlock-method')).toHaveText('unlocked with pin');
     },
   );
 
@@ -41,10 +41,10 @@ describe('biometric unlock', { skip: skipWithoutPin, retries: 2, timeout: 120_00
     await device.enrollBiometrics('faceid', false);
     await screen.getByTestId('unlock').tap();
 
-    await expect(screen.getByTestId('pin-notice')).toHaveText("Face ID isn't set up on this device. Enter your PIN.");
+    await expect(screen.getByTestId('pin-notice')).toHaveText("Face ID isn't set up on this device. enter your pin.");
     await screen.getByTestId('pin').fill(secrets.get('pin'));
     await screen.getByTestId('submit-pin').tap();
-    await expect(screen.getByTestId('unlock-method')).toHaveText('Unlocked with PIN');
+    await expect(screen.getByTestId('unlock-method')).toHaveText('unlocked with pin');
   });
 
   test('the app locks again after going to the background', async ({
@@ -61,7 +61,7 @@ describe('biometric unlock', { skip: skipWithoutPin, retries: 2, timeout: 120_00
 
     await device.openApp(BUNDLE_ID);
     // A relaunch would show the lock screen too, but never this notice.
-    await expect(screen.getByTestId('lock-notice')).toHaveText('Locked when the app went to the background.');
+    await expect(screen.getByTestId('lock-notice')).toHaveText('locked when the app went to the background.');
     expect((await device.foregroundApp()).bundleId).toBe(BUNDLE_ID);
   });
 });

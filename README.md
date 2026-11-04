@@ -2,12 +2,12 @@
 
 An Expo lock screen that unlocks with Face ID or a fingerprint and falls back to a PIN, tested end to end on iOS and Android with [e2e](https://www.npmjs.com/package/e2e).
 
-<img src="docs/screenshot.png" alt="The lock screen: Your account is locked, a line naming Face ID, and Unlock" width="320">
+<img src="docs/screenshot.png" alt="The lock screen: your account is locked, a line naming Face ID, and unlock" width="320">
 
 ## How it works
 
 - **Unlock** (`src/hooks/use-lock.ts`): asks for Face ID on iOS or a fingerprint on Android through `expo-local-authentication`. The prompt is the system's; the app only learns whether it matched.
-- **PIN** (`src/components/pin-form.tsx`): takes over after a failed match, after Use PIN, or at once when nothing is enrolled.
+- **PIN** (`src/components/pin-form.tsx`): takes over after a failed match, after use pin, or at once when nothing is enrolled.
 - **Background**: the app locks again as soon as it goes to the background.
 
 The app has its own PIN, like a banking app, so the device's passcode isn't offered as a fallback. The PIN comes from `.env.local` and is built into the app, which is fine for a demo; a real app checks it on its server. There's no backend.
@@ -48,14 +48,14 @@ Android shows a biometric prompt only on a device with a screen lock, and the te
 
 ## End-to-end tests
 
-`tests/biometrics.e2e.ts` runs on iOS and Android. A test can't show a face or touch a sensor, so e2e's `device` fixture plays them (`device.setBiometrics`), takes Face ID off the simulator (`device.enrollBiometrics`), and sends the app home and back (`device.home`, `device.openApp`). After a failed match, the agent reads the system's prompt and taps its Use PIN, since iOS and Android word and build it differently. The app's own screens use exact locators, and the PIN is typed as an e2e secret, so it stays out of reports and logs.
+`tests/biometrics.e2e.ts` runs on iOS and Android. A test can't show a face or touch a sensor, so e2e's `device` fixture plays them (`device.setBiometrics`), takes Face ID off the simulator (`device.enrollBiometrics`), and sends the app home and back (`device.home`, `device.openApp`). After a failed match, the agent reads the system's prompt and taps its use pin, since iOS and Android word and build it differently. The app's own screens use exact locators, and the PIN is typed as an e2e secret, so it stays out of reports and logs.
 
 | Test                                              | Expects                                                                  |
 | ------------------------------------------------- | ------------------------------------------------------------------------ |
-| A match unlocks                                   | "Unlocked with Face ID" or "Unlocked with your fingerprint"              |
+| A match unlocks                                   | "unlocked with Face ID" or "unlocked with your fingerprint"              |
 | A failed match offers the PIN (agent)             | The system says not recognized; a wrong PIN fails, the right one unlocks |
 | Nothing enrolled goes straight to the PIN (iOS)   | The PIN field at once, with no prompt                                    |
-| The app locks again after going to the background | "Locked when the app went to the background."                            |
+| The app locks again after going to the background | "locked when the app went to the background."                            |
 
 The tests need `EXPO_PUBLIC_PIN`, and the agent test also needs a [Vercel AI Gateway](https://vercel.com/docs/ai-gateway) key, `AI_GATEWAY_API_KEY`, both in `.env.local`. Without them they skip. Android has no way to unenroll a fingerprint from a test, so the "nothing enrolled" test runs on iOS only. After `npm run ios` or `npm run android`, run:
 
