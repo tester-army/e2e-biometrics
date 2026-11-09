@@ -77,3 +77,10 @@ Without `--target`, both run, in about a minute and a half and under a cent. The
 | `npm run typecheck` | Run TypeScript                      |
 | `npm run format`    | Format with Prettier                |
 | `npm run test:e2e`  | Run the e2e tests on both platforms |
+
+<a href="https://e2e.com">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/e2e-logo-white.png">
+    <img src="docs/e2e-logo-black.png" alt="e2e" width="160">
+  </picture>
+</a>
